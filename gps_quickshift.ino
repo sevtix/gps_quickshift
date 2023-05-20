@@ -113,19 +113,26 @@ void error(uint8_t c) {
 
 void injectStart() {
   volatile unsigned long currentTime = micros();
-  Serial.println("inject event");
-  
+
   if (currentTime >= InjectionPreviousTime) {
     InjectionTimeDifference = currentTime - InjectionPreviousTime;
   } else {
     // Handle overflow
     InjectionTimeDifference = (overflowLimit - InjectionPreviousTime) + currentTime;
   }
-  
-  InjectionPreviousTime = currentTime;
 
-  // Calculate RPM
-  float InjectionTimeDifferenceInSeconds = InjectionTimeDifference / 1000000.0;  // Convert to seconds
-  rpm = 60.0 / (InjectionTimeDifferenceInSeconds * InjectionPulsesPerRevolution);
-  Serial.println(rpm);
+  // Min Time Diff 2ms
+  if(InjectionTimeDifference >= 2000) {
+      
+    Serial.println("trigger valid");
+    InjectionPreviousTime = currentTime;
+
+    // Calculate RPM
+    float InjectionTimeDifferenceInSeconds = InjectionTimeDifference / 1000000.0;  // Convert to seconds
+    rpm = 60.0 / (InjectionTimeDifferenceInSeconds * InjectionPulsesPerRevolution);
+    Serial.println(rpm);
+  } else {
+    Serial.println("trigger dropped");
+  }
+
 }
