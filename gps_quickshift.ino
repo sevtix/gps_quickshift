@@ -25,8 +25,8 @@ void setup() {
   pinMode(8, OUTPUT);
 
   // Injector Capture
-  pinMode(inputPin, INPUT_PULLUP); 
-  attachInterrupt(digitalPinToInterrupt(inputPin), injectStart, FALLING);
+  pinMode(5, INPUT_PULLUP); 
+  attachInterrupt(digitalPinToInterrupt(5), injectStart, FALLING);
 
 
   // see if the card is present and can be initialized:
@@ -113,6 +113,7 @@ void error(uint8_t c) {
 
 void injectStart() {
   volatile unsigned long currentTime = micros();
+  Serial.println("inject event");
   
   if (currentTime >= InjectionPreviousTime) {
     InjectionTimeDifference = currentTime - InjectionPreviousTime;
@@ -126,4 +127,5 @@ void injectStart() {
   // Calculate RPM
   float InjectionTimeDifferenceInSeconds = InjectionTimeDifference / 1000000.0;  // Convert to seconds
   rpm = 60.0 / (InjectionTimeDifferenceInSeconds * InjectionPulsesPerRevolution);
+  Serial.println(rpm);
 }
