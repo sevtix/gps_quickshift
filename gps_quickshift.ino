@@ -8,11 +8,29 @@ long LoggerLastTimestamp = 0L;  // ms
 long LoggerFlushTimestamp = 0L;  // ms
 int LoggerFlushInterval = 1000;  // ms;
 
-volatile unsigned long InjectionPreviousTime = 0;
-volatile unsigned long InjectionTimeDifference = 0;
-const int InjectionPulsesPerRevolution = 1;  // Change this value according to your motorcycle's injector configuration
-const unsigned long overflowLimit = 4294967295UL;  // Micros() overflow limit
-float rpm = 0;
+// Define the number ranges
+int range1_min = 1;
+int range1_max = 10;
+
+int rangeN_min = 90;
+int rangeN_max = 100;
+
+int range2_min = 15;
+int range2_max = 25;
+
+int range3_min = 30;
+int range3_max = 40;
+
+int range4_min = 45;
+int range4_max = 55;
+
+int range5_min = 60;
+int range5_max = 70;
+
+int range6_min = 75;
+int range6_max = 85;
+
+bool CUT = false;
 
 File logfile;
 Adafruit_ADS1115 ads1115;
@@ -24,10 +42,8 @@ void setup() {
   pinMode(13, OUTPUT); // LED
   pinMode(8, OUTPUT);
 
-  // Injector Capture
-  pinMode(5, INPUT_PULLUP); 
-  attachInterrupt(digitalPinToInterrupt(5), injectStart, FALLING);
-
+  // MOSFET Output
+  pinMode(5, OUTPUT); 
 
   // see if the card is present and can be initialized:
   if (!SD.begin(4)) {
@@ -57,6 +73,31 @@ void setup() {
 
 void loop() {
   long currentMillis = millis();
+  
+  // read ads1115 adc
+  int16_t adc0 = ads1115.readADC_SingleEnded(0);
+
+  // convert to volt
+  float volts0 = ads1115.computeVolts(adc0);
+
+  // Check if the ADC value is within any of the ranges
+  if (adc0 >= range1_min && adc0 <= range1_max) {
+    NoCut();
+  } else if (adc0 >= range2_min && adc0 <= range2_max) {
+    NoCut();
+  } else if (adc0 >= range3_min && adc0 <= range3_max) {
+    NoCut();
+  } else if (adc0 >= range4_min && adc0 <= range4_max) {
+    NoCut();
+  } else if (adc0 >= range5_min && adc0 <= range5_max) {
+    NoCut();
+  } else if (adc0 >= range6_min && adc0 <= range6_max) {
+    NoCut();
+  } else if (adc0 >= range7_min && adc0 <= range7_max) {
+    NoCut();
+  } else {
+    Cut();
+  }
 
   // prevents multiple datapoints in a milisecond
   if (LoggerLastTimestamp <= currentMillis) {
@@ -64,11 +105,6 @@ void loop() {
     // green led on
     digitalWrite(8, HIGH);
 
-    // read ads1115 adc
-    int16_t adc0 = ads1115.readADC_SingleEnded(0);
-
-    // convert to volt
-    float volts0 = ads1115.computeVolts(adc0);
     //float volts0 = 0;
 
     // log data
@@ -95,6 +131,20 @@ void loop() {
   }
 }
 
+void NoCut() {
+  if(CUT) {
+    digitalWrite(5, HIGH);
+    CUT = false;
+  }
+}
+
+void Cut() {
+  if(!CUT) {
+    digitalWrite(5, LOW);
+    CUT = true;
+  }
+}
+
 // blink out an error code
 void error(uint8_t c) {
   while (true) {
@@ -109,30 +159,4 @@ void error(uint8_t c) {
       delay(200);
     }
   }
-}
-
-void injectStart() {
-  volatile unsigned long currentTime = micros();
-
-  if (currentTime >= InjectionPreviousTime) {
-    InjectionTimeDifference = currentTime - InjectionPreviousTime;
-  } else {
-    // Handle overflow
-    InjectionTimeDifference = (overflowLimit - InjectionPreviousTime) + currentTime;
-  }
-
-  // Min Time Diff 2ms
-  if(InjectionTimeDifference >= 2000) {
-      
-    Serial.println("trigger valid");
-    InjectionPreviousTime = currentTime;
-
-    // Calculate RPM
-    float InjectionTimeDifferenceInSeconds = InjectionTimeDifference / 1000000.0;  // Convert to seconds
-    rpm = 60.0 / (InjectionTimeDifferenceInSeconds * InjectionPulsesPerRevolution);
-    Serial.println(rpm);
-  } else {
-    Serial.println("trigger dropped");
-  }
-
 }
