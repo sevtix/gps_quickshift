@@ -8,27 +8,30 @@ long LoggerLastTimestamp = 0L;  // ms
 long LoggerFlushTimestamp = 0L;  // ms
 int LoggerFlushInterval = 1000;  // ms;
 
-// Define the number ranges
-int range1_min = 1;
-int range1_max = 10;
+// Gear margin
+int GearMargin = 200;
 
-int rangeN_min = 90;
-int rangeN_max = 100;
+// Define the gear ranges
+int range1_min = 3286 - GearMargin;
+int range1_max = 3312 + GearMargin;
 
-int range2_min = 15;
-int range2_max = 25;
+int rangeN_min = 5826 - GearMargin;
+int rangeN_max = 5857 + GearMargin;
 
-int range3_min = 30;
-int range3_max = 40;
+int range2_min = 7285 - GearMargin;
+int range2_max = 7305 + GearMargin;
 
-int range4_min = 45;
-int range4_max = 55;
+int range3_min = 11297 - GearMargin;
+int range3_max = 11319 + GearMargin;
 
-int range5_min = 60;
-int range5_max = 70;
+int range4_min = 15364 - GearMargin;
+int range4_max = 15383 + GearMargin;
 
-int range6_min = 75;
-int range6_max = 85;
+int range5_min = 19351 - GearMargin;
+int range5_max = 19380 + GearMargin;
+
+int range6_min = 23375 - GearMargin;
+int range6_max = 23400 + GearMargin;
 
 bool CUT = false;
 
